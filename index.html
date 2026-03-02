@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Color Master Pro</title>
+    <title>Color Master Pro | @vsqhwb-30i</title>
     <style>
         body {
             background-color: #0a0a0a;
@@ -25,7 +25,6 @@
             width: 350px;
         }
 
-        /* Градиент от красного до черного */
         .color-picker-bar {
             width: 100%;
             height: 40px;
@@ -49,7 +48,7 @@
             font-size: 20px;
             text-shadow: 1px 1px 3px #000;
             border: 2px solid #555;
-            transition: 0.2s;
+            transition: background-color 0.3s ease, transform 0.1s;
         }
 
         input {
@@ -101,7 +100,13 @@
             border-radius: 50%;
             border: 2px solid #444;
             cursor: pointer;
+            transition: transform 0.2s;
         }
+
+        .chip:hover { transform: scale(1.1); }
+
+        .footer { margin-top: 20px; font-size: 14px; opacity: 0.6; }
+        a { color: #00ffcc; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -111,21 +116,23 @@
         
         <div class="preview-box" id="preview">#FF0000</div>
 
-        <p>Выбор от красного до черного:</p>
+        <p>От красного до черного:</p>
         <div class="color-picker-bar" id="gradientBar"></div>
 
         <input type="text" id="hexInput" placeholder="#HEX-CODE" maxlength="7">
         
         <div class="controls">
-            <button onclick="applyManual()">Применить</button>
             <button onclick="addRandom()" style="background: #4b0082;">Рандом</button>
+        </div>
+        
+        <div class="footer">
+            Создано Женей | <a href="https://t.me/yh_vsqhwb30">@vsqhwb-30i</a>
         </div>
     </div>
 
     <div class="history" id="history"></div>
 
     <script>
-        // Функция звука (Beep)
         function playSound(freq = 440) {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
@@ -143,16 +150,26 @@
         const hexInput = document.getElementById('hexInput');
         const history = document.getElementById('history');
 
-        // Клик по градиенту
+        // АВТО-ПРИМЕНЕНИЕ (Тот самый "живой" ввод)
+        hexInput.addEventListener('input', function() {
+            let val = this.value;
+            if (!val.startsWith('#') && val.length > 0) {
+                val = '#' + val;
+                this.value = val;
+            }
+            // Если введено 7 символов (напр. #FF0000), применяем сразу
+            if (val.length === 7) {
+                updateColor(val);
+                playSound(600);
+            }
+        });
+
         document.getElementById('gradientBar').addEventListener('click', function(e) {
             const rect = this.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const percent = x / rect.width;
-            
-            // Расчет цвета от красного (255,0,0) к черному (0,0,0)
             const r = Math.round(255 * (1 - percent));
             const hex = "#" + r.toString(16).padStart(2, '0') + "0000";
-            
             updateColor(hex);
             playSound(300 + (percent * 500));
         });
@@ -164,15 +181,6 @@
             addToHistory(hex);
         }
 
-        function applyManual() {
-            let val = hexInput.value;
-            if(!val.startsWith('#')) val = '#' + val;
-            if(val.length === 7) {
-                updateColor(val);
-                playSound(600);
-            }
-        }
-
         function addRandom() {
             const hex = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
             updateColor(hex);
@@ -180,8 +188,12 @@
         }
 
         function addToHistory(hex) {
+            // Проверка, чтобы не добавлять один и тот же цвет дважды подряд
+            if (history.firstChild && history.firstChild.dataset.color === hex) return;
+
             const chip = document.createElement('div');
             chip.className = 'chip';
+            chip.dataset.color = hex;
             chip.style.backgroundColor = hex;
             chip.onclick = () => { updateColor(hex); playSound(400); };
             history.prepend(chip);
