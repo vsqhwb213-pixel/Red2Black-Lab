@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Color Master Pro</title>
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            user-select: none;
+        }
+
+        .main-card {
+            background: #151515;
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+            text-align: center;
+            width: 350px;
+        }
+
+        /* Градиент от красного до черного */
+        .color-picker-bar {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(to right, #ff0000, #800000, #300000, #000000);
+            border-radius: 10px;
+            margin: 20px 0;
+            cursor: crosshair;
+            border: 2px solid #444;
+        }
+
+        .preview-box {
+            width: 100%;
+            height: 100px;
+            background: #ff0000;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            text-shadow: 1px 1px 3px #000;
+            border: 2px solid #555;
+            transition: 0.2s;
+        }
+
+        input {
+            width: 80%;
+            padding: 12px;
+            background: #222;
+            border: 1px solid #444;
+            color: #00ffcc;
+            border-radius: 8px;
+            font-size: 18px;
+            text-align: center;
+            outline: none;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 15px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #444;
+            transform: scale(1.05);
+        }
+
+        .history {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            max-width: 600px;
+            justify-content: center;
+        }
+
+        .chip {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #444;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-card">
+        <h2 style="color: #ff3333;">HEX Lab</h2>
+        
+        <div class="preview-box" id="preview">#FF0000</div>
+
+        <p>Выбор от красного до черного:</p>
+        <div class="color-picker-bar" id="gradientBar"></div>
+
+        <input type="text" id="hexInput" placeholder="#HEX-CODE" maxlength="7">
+        
+        <div class="controls">
+            <button onclick="applyManual()">Применить</button>
+            <button onclick="addRandom()" style="background: #4b0082;">Рандом</button>
+        </div>
+    </div>
+
+    <div class="history" id="history"></div>
+
+    <script>
+        // Функция звука (Beep)
+        function playSound(freq = 440) {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.1);
+        }
+
+        const preview = document.getElementById('preview');
+        const hexInput = document.getElementById('hexInput');
+        const history = document.getElementById('history');
+
+        // Клик по градиенту
+        document.getElementById('gradientBar').addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const percent = x / rect.width;
+            
+            // Расчет цвета от красного (255,0,0) к черному (0,0,0)
+            const r = Math.round(255 * (1 - percent));
+            const hex = "#" + r.toString(16).padStart(2, '0') + "0000";
+            
+            updateColor(hex);
+            playSound(300 + (percent * 500));
+        });
+
+        function updateColor(hex) {
+            preview.style.backgroundColor = hex;
+            preview.innerText = hex.toUpperCase();
+            hexInput.value = hex.toUpperCase();
+            addToHistory(hex);
+        }
+
+        function applyManual() {
+            let val = hexInput.value;
+            if(!val.startsWith('#')) val = '#' + val;
+            if(val.length === 7) {
+                updateColor(val);
+                playSound(600);
+            }
+        }
+
+        function addRandom() {
+            const hex = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            updateColor(hex);
+            playSound(800);
+        }
+
+        function addToHistory(hex) {
+            const chip = document.createElement('div');
+            chip.className = 'chip';
+            chip.style.backgroundColor = hex;
+            chip.onclick = () => { updateColor(hex); playSound(400); };
+            history.prepend(chip);
+            if(history.children.length > 12) history.lastChild.remove();
+        }
+    </script>
+</body>
+</html>
