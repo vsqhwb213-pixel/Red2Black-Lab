@@ -2,9 +2,10 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>HEX Lab - @vsqhwb-30i</title
-    <style
-        <link rel="icon" href="sketch-1772453804491.png" type="image/png">
+    <title>HEX Lab - @vsqhwb-30i</title>
+    <link rel="icon" href="sketch-1772453804491.png" type="image/png">
+
+    <style>
         body { background-color: #0a0a0a; color: #e0e0e0; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; user-select: none; }
         .main-card { background: #151515; padding: 25px; border-radius: 20px; border: 1px solid #333; box-shadow: 0 10px 50px rgba(0,0,0,0.8); text-align: center; width: 350px; }
         .color-picker-bar { width: 100%; height: 40px; background: linear-gradient(to right, #ff0000, #000000); border-radius: 10px; margin: 20px 0; cursor: crosshair; border: 2px solid #444; }
@@ -15,6 +16,7 @@
         .chip:hover { transform: scale(1.1); }
     </style>
 </head>
+
 <body>
 
     <div class="main-card">
@@ -32,7 +34,6 @@
         const hexInput = document.getElementById('hexInput');
         const historyContainer = document.getElementById('history');
 
-        // Загрузка истории из памяти при старте
         let savedColors = JSON.parse(localStorage.getItem('myColors')) || [];
         savedColors.forEach(color => renderChip(color));
 
@@ -56,7 +57,6 @@
             }
         }
 
-        // Мгновенная работа при вводе
         hexInput.oninput = () => {
             let val = hexInput.value;
             if (!val.startsWith('#')) val = '#' + val;
@@ -67,7 +67,6 @@
             }
         };
 
-        // Клик по градиенту
         document.getElementById('gradientBar').onclick = (e) => {
             const rect = e.target.getBoundingClientRect();
             const percent = (e.clientX - rect.left) / rect.width;
